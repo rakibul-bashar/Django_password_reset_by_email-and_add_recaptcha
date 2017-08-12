@@ -1,3 +1,4 @@
+import requests
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
@@ -9,14 +10,18 @@ from django.template.loader import render_to_string
 from signups.forms import SignUpForm
 from signups.tokens import account_activation_token
 from django.core.mail import EmailMessage
-
+from django.conf import settings
+from django.contrib import messages
+from .decorators import check_recaptcha
+@check_recaptcha
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and request.recaptcha_is_valid:
             user = form.save(commit=False)
             user.is_active = False
             user.save()
+            messages.success(request, 'New  messages send with success!')
             current_site = get_current_site(request)
             subject = 'Activate Your MySite Account'
             message = render_to_string('account_activation_email.html', {
@@ -28,6 +33,7 @@ def signup(request):
             to_email = form.cleaned_data.get('email')
             email = EmailMessage(subject, message, to=[to_email])
             email.send()
+
             #user.email_user(subject, message)
             return redirect('account_activation_sent')
     else:

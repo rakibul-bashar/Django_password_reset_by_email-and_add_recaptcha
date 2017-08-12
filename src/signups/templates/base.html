@@ -7,6 +7,16 @@
     <body>
         <h1>My Site</h1>
         <p><a href="login">Login </a>/ <a href="signup"> Signups </a></p>
+	{% if messages%}
+
+      <div class="row">
+	 <div class="col-sm-6 col-sm-offset-3">
+	{% for message in messages%}
+        <p{% if message.tags ==  "success" %} class="alert alert-success" {%endif%}>{{message}} </p>
+	{%endfor%}
+	</div>
+      </div>
+{% endif%}
         <div class="row">
 
                     {% block content %}
